@@ -39,6 +39,7 @@ router.post("/addroute", fetchuser, async (req, res) => {
             name: location.name,
             latitude: location.latitude,
             longitude: location.longitude,
+            time: location.time,
           })),
         },
       },
@@ -201,9 +202,18 @@ router.post("/addtwroute", fetchuser, async (req, res) => {
     const { locations } = req.body;
 
     // Create a new route in the database using Prisma
-    const newRoute = await prisma.twRoute.create({
+    const newRoute = await prisma.tWRoute.create({
       data: {
-        locations,
+        locations: {
+          create: locations.map((location) => ({
+            name: location.name,
+            latitude: location.lat,
+            longitude: location.lng,
+            startTime: location.startTime,
+            endTime: location.endTime,
+            phoneNumber: location.mobile,
+          })),
+        },
         userId: req.user.id,
       },
     });

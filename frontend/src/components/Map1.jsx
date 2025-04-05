@@ -117,6 +117,32 @@ const Map1 = () => {
     }
   };
 
+  const handleSaveRoute = async () => {
+    try {
+      const response = await fetch("http://localhost:3000/api/routes/addtwroute", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "auth-token": `${localStorage.getItem("token")}`, // Include token for authentication
+        },
+        body: JSON.stringify({
+          locations: locations.filter((loc) => !loc.isCurrent), // Exclude the current location
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to save the route");
+      }
+
+      const data = await response.json();
+      alert("Route saved successfully!");
+      console.log("Saved Route:", data);
+    } catch (error) {
+      console.error("Error saving route:", error);
+      alert("Failed to save the route. Please try again.");
+    }
+  };
+
   const removeLeadingZeros = (time) => {
     return time.split(":").map((part) => String(Number(part))).join(":");
   };
@@ -335,21 +361,39 @@ const optimizedRouteCoordinates = data[0]
     </div>
   )}
 
-  <button
-    disabled={locations.length <= 1}
-    style={{
-      padding: "10px 15px",
-      backgroundColor: locations.length > 1 ? "#fff" : "#ccc",
-      color: locations.length > 1 ? "#1976d2" : "#666",
-      border: "none",
-      borderRadius: "5px",
-      cursor: locations.length > 1 ? "pointer" : "not-allowed",
-      fontWeight: "bold",
-    }}
-    onClick={handleGetDirections}
-  >
-    Get Directions
-  </button>
+<div style={{ display: "flex", gap: "10px" }}>
+          <button
+            disabled={locations.length <= 1}
+            style={{
+              padding: "10px 15px",
+              backgroundColor: locations.length > 1 ? "#fff" : "#ccc",
+              color: locations.length > 1 ? "#1976d2" : "#666",
+              border: "none",
+              borderRadius: "5px",
+              cursor: locations.length > 1 ? "pointer" : "not-allowed",
+              fontWeight: "bold",
+            }}
+            onClick={handleSaveRoute}
+          >
+            Save
+          </button>
+
+          <button
+            disabled={locations.length <= 1}
+            style={{
+              padding: "10px 15px",
+              backgroundColor: locations.length > 1 ? "#fff" : "#ccc",
+              color: locations.length > 1 ? "#1976d2" : "#666",
+              border: "none",
+              borderRadius: "5px",
+              cursor: locations.length > 1 ? "pointer" : "not-allowed",
+              fontWeight: "bold",
+            }}
+            onClick={handleGetDirections}
+          >
+            Get Directions
+          </button>
+        </div>
 </nav>
 
       {/* Map */}
@@ -497,6 +541,7 @@ const optimizedRouteCoordinates = data[0]
           </button>
 
           {/* Sidebar over Map */}
+{/* Sidebar over Map */}
 {locations.length > 1 && (
   <div
     style={{
@@ -513,43 +558,69 @@ const optimizedRouteCoordinates = data[0]
       zIndex: 10,
     }}
   >
-    <h4>Customers</h4>
-    {locations
-      .filter((loc) => !loc.isCurrent)
-      .map((loc, idx) => (
-        <div
-          key={idx}
-          style={{
-            borderBottom: "1px solid #ddd",
-            marginBottom: "8px",
-            paddingBottom: "4px",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
-          <div>
-            <div><strong>{loc.name}</strong></div>
-            <div style={{ fontSize: "12px" }}>{loc.mobile}</div>
+    <h4>{directionsResponse ? "Directions" : "Customers"}</h4>
+    {directionsResponse ? (
+      // Show textual directions
+      <div>
+        {directionsResponse.routes[0].legs.map((leg, legIndex) => (
+          <div key={legIndex} style={{ marginBottom: "10px" }}>
+            <strong>From:</strong> {leg.start_address}
+            <br />
+            <strong>To:</strong> {leg.end_address}
+            <br />
+            <ul style={{ paddingLeft: "20px", marginTop: "5px" }}>
+              {leg.steps.map((step, stepIndex) => (
+                <li
+                  key={stepIndex}
+                  dangerouslySetInnerHTML={{ __html: step.html_instructions }}
+                  style={{ fontSize: "12px", marginBottom: "5px" }}
+                ></li>
+              ))}
+            </ul>
           </div>
-          <button
-            onClick={() => {
-              const updated = locations.filter((_, i) => i !== idx + 1); // +1 to skip current location
-              setLocations(updated);
-            }}
+        ))}
+      </div>
+    ) : (
+      // Show added customers
+      locations
+        .filter((loc) => !loc.isCurrent)
+        .map((loc, idx) => (
+          <div
+            key={idx}
             style={{
-              border: "none",
-              background: "none",
-              color: "red",
-              fontWeight: "bold",
-              cursor: "pointer",
-              fontSize: "16px",
+              borderBottom: "1px solid #ddd",
+              marginBottom: "8px",
+              paddingBottom: "4px",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
             }}
           >
-            ✕
-          </button>
-        </div>
-      ))}
+            <div>
+              <div>
+                <strong>{loc.name}</strong>
+              </div>
+              <div style={{ fontSize: "12px" }}>{loc.mobile}</div>
+            </div>
+            <button
+              onClick={() => {
+                const updated = locations.filter((_, i) => i !== idx + 1); // +1 to skip current location
+                setLocations(updated);
+              }}
+              style={{
+                border: "none",
+                background: "none",
+                color: "red",
+                fontWeight: "bold",
+                cursor: "pointer",
+                fontSize: "16px",
+              }}
+            >
+              ✕
+            </button>
+          </div>
+        ))
+    )}
   </div>
 )}
 
