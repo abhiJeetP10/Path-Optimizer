@@ -17,7 +17,7 @@ router.get("/fetchallroutes", fetchuser, async (req, res) => {
   try {
     const routes = await prisma.route.findMany({
       where: { userId: req.user.id },
-      include: { locations: true }, // Include all locations in the route
+      include: { locations: true },
     });
     res.json(routes);
   } catch (err) {
@@ -47,6 +47,19 @@ router.post("/addroute", fetchuser, async (req, res) => {
         locations: true,
       },
     });
+    // await prisma.$transaction(async (prisma) => {
+    //   const route = await prisma.route.update({
+    //     where: { id },
+    //     data: { name: "Updated Route" },
+    //   });
+
+    //   await prisma.location.createMany({
+    //     data: newLocations.map((location) => ({
+    //       routeId: id,
+    //       ...location,
+    //     })),
+    //   });
+    // });
 
     res.status(201).json(newRoute);
   } catch (error) {
@@ -117,24 +130,28 @@ router.delete(
     try {
       const route = await prisma.route.findUnique({
         where: { id: routeId },
+        include: { locations: true },
       });
 
       if (!route) {
         return res.status(404).json({ message: "Route not found" });
       }
 
-      const updatedLocations = route.locations.filter(
-        (customer) => customer.id !== customerId
+      const customerExists = route.locations.some(
+        (customer) => customer.id === customerId
       );
 
-      const updatedRoute = await prisma.route.update({
-        where: { id: routeId },
-        data: { locations: updatedLocations },
+      if (!customerExists) {
+        return res
+          .status(404)
+          .json({ message: "Customer not found in this route" });
+      }
+
+      await prisma.location.delete({
+        where: { id: customerId },
       });
 
-      res
-        .status(200)
-        .json({ message: "Customer deleted successfully", updatedRoute });
+      res.status(200).json({ message: "Customer deleted successfully" });
     } catch (error) {
       console.error("Error deleting customer:", error);
       res.status(500).json({ message: "Internal Server Error" });
@@ -150,27 +167,29 @@ router.put("/updatetime/:routeId/:customerId", fetchuser, async (req, res) => {
   try {
     const route = await prisma.route.findUnique({
       where: { id: routeId },
+      include: { locations: true },
     });
 
     if (!route) {
       return res.status(404).json({ message: "Route not found" });
     }
 
-    const updatedLocations = route.locations.map((customer) => {
-      if (customer.id === customerId) {
-        return { ...customer, time: newTime };
-      }
-      return customer;
+    const customerExists = route.locations.some(
+      (customer) => customer.id === customerId
+    );
+
+    if (!customerExists) {
+      return res
+        .status(404)
+        .json({ message: "Customer not found in this route" });
+    }
+
+    await prisma.location.update({
+      where: { id: customerId },
+      data: { time: newTime },
     });
 
-    const updatedRoute = await prisma.route.update({
-      where: { id: routeId },
-      data: { locations: updatedLocations },
-    });
-
-    res
-      .status(200)
-      .json({ message: "Customer time updated successfully", updatedRoute });
+    res.status(200).json({ message: "Customer time updated successfully" });
   } catch (error) {
     console.error("Error updating customer time:", error);
     res.status(500).json({ message: "Internal Server Error" });

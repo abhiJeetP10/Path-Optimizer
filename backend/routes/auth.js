@@ -1,7 +1,13 @@
 require("dotenv").config();
 const express = require("express");
 const router = express.Router();
-const { CreateUserSchema, AuthenticateUserSchema } = require("../types/index");
+const {
+  CreateUserSchema,
+  AuthenticateUserSchema,
+  UpdateUserSchema,
+  ResetPasswordSchema,
+  UpdatePasswordSchema,
+} = require("../types/index");
 const bcrypt = require("bcryptjs");
 var jwt = require("jsonwebtoken");
 var fetchuser = require("../middleware/fetchuser");
@@ -73,7 +79,7 @@ router.post(
           mobile: req.body.mobile,
           image: "",
           gender: "",
-          waitTime: "5",
+          waitTime: req.body.waitTime,
         },
       });
 
@@ -179,8 +185,11 @@ router.post("/userdata", async (req, res) => {
 });
 
 router.post("/update-user", async (req, res) => {
-  const { name, email, mobile, image, gender, waitTime } = req.body;
   try {
+    if (!UpdateUserSchema.safeParse(req.body).success) {
+      return res.status(400).json({ error: "Invalid data" });
+    }
+    const { name, email, mobile, image, gender, waitTime } = req.body;
     await prisma.user.update({
       where: { email },
       data: { name, mobile, image, gender, waitTime },
@@ -231,8 +240,11 @@ router.post("/update-user", async (req, res) => {
 // });
 
 router.post("/reset-password", async (req, res) => {
-  const { email, code, newPassword } = req.body;
   try {
+    if (!ResetPasswordSchema.safeParse(req.body).success) {
+      return res.status(400).json({ error: "Invalid data" });
+    }
+    const { email, code, newPassword } = req.body;
     const user = await prisma.user.findUnique({
       where: { email },
     });
@@ -269,6 +281,9 @@ router.post("/reset-password", async (req, res) => {
 
 router.post("/update-password", async (req, res) => {
   try {
+    if (!UpdatePasswordSchema.safeParse(req.body).success) {
+      return res.status(400).json({ error: "Invalid data" });
+    }
     const { token, currentPassword, newPassword } = req.body;
     const data = jwt.verify(token, JWT_SECRET);
     const userId = data.user.id;

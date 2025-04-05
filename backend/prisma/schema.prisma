@@ -23,7 +23,7 @@ model User {
   gender   String?
   verificationCode String?
   verificationCodeExpires DateTime?
-  waitTime String?
+  waitTime String? @default("5")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   Routes    Route[]
@@ -74,4 +74,3 @@ model TWRoute {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
-
