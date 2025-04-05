@@ -16,21 +16,25 @@ const Dashboard = () => {
             <div className="flex flex-wrap -m-4">
               {/* Card 1 */}
               <div className="p-4 md:w-1/3">
-                <div className="h-full border-2 border-gray-200 border-opacity-60 rounded-lg overflow-hidden transform transition duration-300 hover:scale-105">
-                <img src={Time} alt="deadline" className="lg:h-56 md:h-36 w-full object-contain object-center bg-white/95"/>
-                  <div className="p-6 text-center">
-                    <h2 className="tracking-widest text-xl title-font font-bold text-gray-400 mb-4">
-                      Time Windows
-                    </h2>
-                    <p className="leading-relaxed mb-3">
-                      Photo booth fam kinfolk cold-pressed sriracha leggings
-                      jianbing microdosing tousled waistcoat.
-                    </p>
-                    <div className="flex items-center flex-wrap justify-center">
-                      <a
-                        className="text-red-500 inline-flex items-center md:mb-2 lg:mb-0"
-                        href="/Map1"
-                      >
+                <a
+                  className="inline-flex items-center md:mb-2 lg:mb-0"
+                  href="/Map1"
+                >
+                  <div className="h-full border-2 border-gray-200 border-opacity-60 rounded-lg overflow-hidden transform transition duration-300 hover:scale-105">
+                    <img
+                      src={Time}
+                      alt="deadline"
+                      className="lg:h-56 md:h-36 w-full object-contain object-center bg-white/95"
+                    />
+                    <div className="p-6 text-center">
+                      <h2 className="tracking-widest text-xl title-font font-bold text-gray-400 mb-4">
+                        Time Windows
+                      </h2>
+                      <p className="leading-relaxed mb-3">
+                        Photo booth fam kinfolk cold-pressed sriracha leggings
+                        jianbing microdosing tousled waistcoat.
+                      </p>
+                      <div className="flex items-center flex-wrap justify-center text-red-500">
                         Learn More
                         <svg
                           className="w-4 h-4 ml-2"
@@ -44,34 +48,38 @@ const Dashboard = () => {
                           <path d="M5 12h14"></path>
                           <path d="M12 5l7 7-7 7"></path>
                         </svg>
-                      </a>
+                      </div>
                     </div>
                   </div>
-                </div>
+                </a>
               </div>
 
               {/* Card 2 */}
               <div className="p-4 md:w-1/3">
-                <div className="h-full border-2 border-gray-200 border-opacity-60 rounded-lg overflow-hidden transform transition duration-300 hover:scale-105">
-                {/* <img
+                <a
+                  className="inline-flex items-center md:mb-2 lg:mb-0"
+                  href="#"
+                >
+                  <div className="h-full border-2 border-gray-200 border-opacity-60 rounded-lg overflow-hidden transform transition duration-300 hover:scale-105">
+                    {/* <img
                     className="lg:h-48 md:h-36 w-full object-cover object-center"
                     src="https://dummyimage.com/722x402"
                     alt="blog"
                   /> */}
-                  <img src={deadline} alt="deadline" className="lg:h-56 md:h-36 w-full object-cover object-center"/>
-                  <div className="p-6 text-center">
-                    <h2 className="tracking-widest text-xl title-font font-bold text-gray-400 mb-4">
-                      Deadlines
-                    </h2>
-                    <p className="leading-relaxed mb-3">
-                      Photo booth fam kinfolk cold-pressed sriracha leggings
-                      jianbing microdosing tousled waistcoat.
-                    </p>
-                    <div className="flex items-center flex-wrap justify-center">
-                      <a
-                        className="text-red-500 inline-flex items-center md:mb-2 lg:mb-0"
-                        href="#"
-                      >
+                    <img
+                      src={deadline}
+                      alt="deadline"
+                      className="lg:h-56 md:h-36 w-full object-cover object-center"
+                    />
+                    <div className="p-6 text-center">
+                      <h2 className="tracking-widest text-xl title-font font-bold text-gray-400 mb-4">
+                        Deadlines
+                      </h2>
+                      <p className="leading-relaxed mb-3">
+                        Photo booth fam kinfolk cold-pressed sriracha leggings
+                        jianbing microdosing tousled waistcoat.
+                      </p>
+                      <div className="flex items-center flex-wrap justify-center text-red-500 ">
                         Learn More
                         <svg
                           className="w-4 h-4 ml-2"
@@ -85,29 +93,33 @@ const Dashboard = () => {
                           <path d="M5 12h14"></path>
                           <path d="M12 5l7 7-7 7"></path>
                         </svg>
-                      </a>
+                      </div>
                     </div>
                   </div>
-                </div>
+                </a>
               </div>
 
               {/* Card 3 */}
               <div className="p-4 md:w-1/3">
-                <div className="h-full border-2 border-gray-200 border-opacity-60 rounded-lg overflow-hidden transform transition duration-300 hover:scale-105">
-                <img src={savedroute} alt="savedroute" className="lg:h-56 md:h-36 w-full object-cover object-center"/>
-                  <div className="p-6 text-center">
-                    <h2 className="tracking-widest text-xl title-font font-bold text-gray-400 mb-4">
-                      Saved Routes
-                    </h2>
-                    <p className="leading-relaxed mb-3">
-                      Photo booth fam kinfolk cold-pressed sriracha leggings
-                      jianbing microdosing tousled waistcoat.
-                    </p>
-                    <div className="flex items-center flex-wrap justify-center">
-                      <a
-                        className="text-red-500 inline-flex items-center md:mb-2 lg:mb-0"
-                        href="/SavedRoutes"
-                      >
+                <a
+                  className="inline-flex items-center md:mb-2 lg:mb-0"
+                  href="/SavedRoutes"
+                >
+                  <div className="h-full border-2 border-gray-200 border-opacity-60 rounded-lg overflow-hidden transform transition duration-300 hover:scale-105">
+                    <img
+                      src={savedroute}
+                      alt="savedroute"
+                      className="lg:h-56 md:h-36 w-full object-cover object-center"
+                    />
+                    <div className="p-6 text-center">
+                      <h2 className="tracking-widest text-xl title-font font-bold text-gray-400 mb-4">
+                        Saved Routes
+                      </h2>
+                      <p className="leading-relaxed mb-3">
+                        Photo booth fam kinfolk cold-pressed sriracha leggings
+                        jianbing microdosing tousled waistcoat.
+                      </p>
+                      <div className="flex items-center flex-wrap justify-center text-red-500">
                         Learn More
                         <svg
                           className="w-4 h-4 ml-2"
@@ -121,10 +133,10 @@ const Dashboard = () => {
                           <path d="M5 12h14"></path>
                           <path d="M12 5l7 7-7 7"></path>
                         </svg>
-                      </a>
+                      </div>
                     </div>
                   </div>
-                </div>
+                </a>
               </div>
             </div>
           </div>
