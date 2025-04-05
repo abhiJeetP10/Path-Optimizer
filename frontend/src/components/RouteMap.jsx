@@ -8,13 +8,17 @@ import {
   DirectionsService,
   DirectionsRenderer,
 } from "@react-google-maps/api";
+import { useLocation } from "react-router-dom";
+
 
 const containerStyle = {
   width: "100%",
   height: "calc(100vh - 60px)",
 };
 
-const Map1 = () => {
+const RouteMap = () => {
+    const { state } = useLocation(); // Access the passed locations array
+  const { locations: passedLocations } = state || {};
   const [currentPosition, setCurrentPosition] = useState(null);
   const [selectedPosition, setSelectedPosition] = useState(null);
   const [locations, setLocations] = useState([]);
@@ -43,18 +47,22 @@ const Map1 = () => {
   useEffect(() => {
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        const coords = {
-          lat: position.coords.latitude,
-          lng: position.coords.longitude,
-        };
-        setCurrentPosition(coords);
-        setLocations([{ ...coords, isCurrent: true }]);
-      },
-      (error) => {
-        console.error("Error getting location: ", error);
-        const fallback = { lat: 28.6139, lng: 77.209 };
-        setCurrentPosition(fallback);
-        setLocations([{ ...fallback, isCurrent: true }]);
+        const currentLocation = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+            isCurrent: true,
+          };
+
+          // Set the current location and prepend it to the passed locations
+          setCurrentPosition(currentLocation);
+          setLocations([currentLocation, ...(passedLocations || [])]);
+        },
+        (error) => {
+          console.error("Error getting current location:", error);
+          // Fallback to a default location if geolocation fails
+          const fallbackLocation = { lat: 28.6139, lng: 77.209, isCurrent: true }; // Default to Delhi
+          setCurrentPosition(fallbackLocation);
+          setLocations([fallbackLocation, ...(passedLocations || [])]);
       }
     );
   }, []);
@@ -724,4 +732,4 @@ const Map1 = () => {
   );
 };
 
-export default Map1;
+export default RouteMap;

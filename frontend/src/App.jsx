@@ -5,6 +5,7 @@ import Dashboard from './components/Dashboard'
 import Map1 from './components/Map1'
 import SavedRoutes from './components/SavedRoutes'
 import Map2 from './components/Map2'
+import RouteMap from './components/RouteMap'
 import {
   BrowserRouter,
   Route,
@@ -27,6 +28,7 @@ function App() {
            {/* <Route exact path="/showroute" element={<ShowRoute showAlert={showAlert}/>} /> */}
            {/* <Route exact path="/showonmap" element={<Showonmap showAlert={showAlert}/>} /> */}
             <Route exact path="/savedroutes" element={<SavedRoutes />} />
+            <Route exact path="/route-map" element={<RouteMap />} />
          </Routes>
        
      </BrowserRouter>
