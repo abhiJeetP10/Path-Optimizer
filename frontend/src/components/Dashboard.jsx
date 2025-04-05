@@ -106,7 +106,7 @@ const Dashboard = () => {
                     <div className="flex items-center flex-wrap justify-center">
                       <a
                         className="text-red-500 inline-flex items-center md:mb-2 lg:mb-0"
-                        href="/savedRoutes"
+                        href="/SavedRoutes"
                       >
                         Learn More
                         <svg
