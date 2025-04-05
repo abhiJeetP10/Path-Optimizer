@@ -135,6 +135,11 @@ const Login = () => {
           >
             Login
           </button>
+          <div className="register flex justify-center py-5">
+            <a href="/Register">
+              <span className="text-indigo-500">New User(Register)</span>
+            </a>
+          </div>
         </form>
       </div>
     </section>
