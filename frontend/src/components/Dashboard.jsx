@@ -1,10 +1,20 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { useNavigate } from "react-router-dom"; // Import useNavigate for redirection
 import Navbar from "./Navbar";
 import deadline from "../assets/deadline.jpg";
 import savedroute from "../assets/savedroute.jpg";
 import Time from "../assets/Time.png";
 
 const Dashboard = () => {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      navigate("/login");
+    }
+  }, [navigate]);
+
   return (
     <>
       <div className="navbar">
@@ -17,7 +27,11 @@ const Dashboard = () => {
               {/* Card 1 */}
               <div className="p-4 md:w-1/3">
                 <div className="h-full border-2 border-gray-200 border-opacity-60 rounded-lg overflow-hidden">
-                <img src={Time} alt="deadline" className="lg:h-56 md:h-36 w-full object-contain object-center bg-white/95"/>
+                  <img
+                    src={Time}
+                    alt="deadline"
+                    className="lg:h-56 md:h-36 w-full object-contain object-center bg-white/95"
+                  />
                   <div className="p-6 text-center">
                     <h2 className="tracking-widest text-xl title-font font-bold text-gray-400 mb-4">
                       Time Windows
@@ -53,12 +67,11 @@ const Dashboard = () => {
               {/* Card 2 */}
               <div className="p-4 md:w-1/3">
                 <div className="h-full border-2 border-gray-200 border-opacity-60 rounded-lg overflow-hidden">
-                {/* <img
-                    className="lg:h-48 md:h-36 w-full object-cover object-center"
-                    src="https://dummyimage.com/722x402"
-                    alt="blog"
-                  /> */}
-                  <img src={deadline} alt="deadline" className="lg:h-56 md:h-36 w-full object-cover object-center"/>
+                  <img
+                    src={deadline}
+                    alt="deadline"
+                    className="lg:h-56 md:h-36 w-full object-cover object-center"
+                  />
                   <div className="p-6 text-center">
                     <h2 className="tracking-widest text-xl title-font font-bold text-gray-400 mb-4">
                       Deadlines
@@ -94,7 +107,11 @@ const Dashboard = () => {
               {/* Card 3 */}
               <div className="p-4 md:w-1/3">
                 <div className="h-full border-2 border-gray-200 border-opacity-60 rounded-lg overflow-hidden">
-                <img src={savedroute} alt="savedroute" className="lg:h-56 md:h-36 w-full object-cover object-center"/>
+                  <img
+                    src={savedroute}
+                    alt="savedroute"
+                    className="lg:h-56 md:h-36 w-full object-cover object-center"
+                  />
                   <div className="p-6 text-center">
                     <h2 className="tracking-widest text-xl title-font font-bold text-gray-400 mb-4">
                       Saved Routes

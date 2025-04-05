@@ -32,10 +32,11 @@ model User {
 
 model Location {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  name String
   latitude  Float
   longitude Float
-  time      String
-  phoneNumber String
+  time      String?
+  phoneNumber String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   routeId   String   @db.ObjectId

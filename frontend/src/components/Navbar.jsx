@@ -38,7 +38,7 @@ const Navbar = () => {
             </a> */}
           </nav>
           <div className="flex gap-3">
-            <button className="inline-flex items-cente border border-red-500 py-1 px-3 focus:outline-none hover:bg-red-100 rounded text-base mt-4 md:mt-0">
+            {/* <button className="inline-flex items-cente border border-red-500 py-1 px-3 focus:outline-none hover:bg-red-100 rounded text-base mt-4 md:mt-0">
               <a
                 className="text-red-500 inline-flex items-center md:mb-2 lg:mb-0"
                 href="/Login"
@@ -53,7 +53,7 @@ const Navbar = () => {
               >
                 Register
               </a>
-            </button>
+            </button> */}
             <button className="inline-flex items-center text-red-500 border border-red-500 py-1 px-3 focus:outline-none hover:bg-red-100 rounded text-base mt-4 md:mt-0">
               Logout
               <svg
