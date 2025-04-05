@@ -1,6 +1,14 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 
 const Navbar = () => {
+  const navigate = useNavigate();
+
+  const logout = () => {
+    localStorage.removeItem("token");
+    navigate("/Login");
+  };
+
   return (
     <div>
       <header className="text-gray-600 body-font">
@@ -24,37 +32,13 @@ const Navbar = () => {
             <span className="ml-3 text-xl text-red-500">Path-Optimizer</span>
           </a>
           <nav className="md:ml-auto flex flex-wrap items-center text-base justify-center">
-            {/* <a className="mr-5 hover:text-gray-900" href="#">
-              First Link
-            </a>
-            <a className="mr-5 hover:text-gray-900" href="#">
-              Second Link
-            </a>
-            <a className="mr-5 hover:text-gray-900" href="#">
-              Third Link
-            </a>
-            <a className="mr-5 hover:text-gray-900" href="#">
-              Fourth Link
-            </a> */}
+            {/* Navigation links if needed */}
           </nav>
           <div className="flex gap-3">
-            {/* <button className="inline-flex items-cente border border-red-500 py-1 px-3 focus:outline-none hover:bg-red-100 rounded text-base mt-4 md:mt-0">
-              <a
-                className="text-red-500 inline-flex items-center md:mb-2 lg:mb-0"
-                href="/Login"
-              >
-                Login
-              </a>
-            </button>
-            <button className="inline-flex items-center border border-red-500 py-1 px-3 focus:outline-none hover:bg-red-100 rounded text-base mt-4 md:mt-0">
-            <a
-                className="text-red-500 inline-flex items-center md:mb-2 lg:mb-0"
-                href="/Register"
-              >
-                Register
-              </a>
-            </button> */}
-            <button className="inline-flex items-center text-red-500 border border-red-500 py-1 px-3 focus:outline-none hover:bg-red-100 rounded text-base mt-4 md:mt-0">
+            <button
+              onClick={logout}
+              className="inline-flex items-center text-red-500 border border-red-500 py-1 px-3 focus:outline-none hover:bg-red-100 rounded text-base mt-4 md:mt-0"
+            >
               Logout
               <svg
                 fill="none"

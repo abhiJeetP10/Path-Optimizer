@@ -129,6 +129,11 @@ const Register = () => {
           >
             Register
           </button>
+          <div className="register flex justify-center py-5">
+            <a href="/Login">
+              <span className="text-indigo-500">Existing User(Login)</span>
+            </a>
+          </div>
         </form>
       </div>
     </section>
