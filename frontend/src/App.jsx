@@ -21,7 +21,7 @@ function App() {
            <Route exact path="/login" element={<Login />} />
            <Route exact path="/Register" element={<Register />} />
            <Route exact path="/" element={<Dashboard />} />
-           <Route exact path="/map" element={<Map1 />} />
+           <Route exact path="/map1" element={<Map1 />} />
            {/* <Route exact path="/showroute" element={<ShowRoute showAlert={showAlert}/>} /> */}
            {/* <Route exact path="/showonmap" element={<Showonmap showAlert={showAlert}/>} /> */}
             <Route exact path="/savedroutes" element={<SavedRoutes />} />

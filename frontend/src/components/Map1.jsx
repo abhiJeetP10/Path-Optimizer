@@ -178,14 +178,43 @@ const Map1 = () => {
     console.log("Latitude and Longitude Array:", latLongArray);
     console.log("Time Windows Array:", timeWindows);
 
+    // const requestData = {
+    //   locations: latLongArray,
+    //   timeWindows: timeWindows,
+    //   numVehicles: 1,
+    //   startTime: currentFormattedTime,
+    //   waitTime:5
+    // };
+    try {
+       // Step 1: Fetch user data to get the wait time
+    const userResponse = await fetch("http://localhost:3000/api/auth/userdata", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ token: localStorage.getItem("token") }),
+    });
+
+    if (!userResponse.ok) {
+      throw new Error("Failed to fetch user data");
+    }
+
+    const userData = await userResponse.json();
+    const waitTime = userData.data.waitTime || 5; // Default to 5 if waitTime is not provided
+
+    console.log("User Wait Time:", waitTime);
+
+    // Step 2: Call the get-travel-times API with the fetched wait time
     const requestData = {
       locations: latLongArray,
       timeWindows: timeWindows,
       numVehicles: 1,
       startTime: currentFormattedTime,
-      waitTime:5
+      waitTime: parseInt(waitTime), // Use the dynamically fetched wait time
     };
-    try {
+
+
+
       const response = await fetch(`http://localhost:3000/helper/get-travel-times`, {
         method: "POST",
         headers: {
