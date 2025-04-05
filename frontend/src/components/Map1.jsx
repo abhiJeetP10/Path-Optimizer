@@ -562,7 +562,8 @@ const Map1 = () => {
                   onChange={(e) =>
                     setFormData({ ...formData, mobile: e.target.value })
                   }
-                  style={{ marginBottom: 10, width: "100%", padding: 8 }}
+                  style={{ marginBottom: 10, width: "100%", padding: 8 , cursor:"pointer"}}
+                  onClick={(e)=> e.target.showPicker()}
                 />
                 <input
                   type="time"
@@ -572,6 +573,7 @@ const Map1 = () => {
                     setFormData({ ...formData, startTime: e.target.value })
                   }
                   style={{ marginBottom: 10, width: "100%", padding: 8 }}
+                  onClick={(e)=> e.target.showPicker()}
                 />
                 <input
                   type="time"
@@ -580,7 +582,8 @@ const Map1 = () => {
                   onChange={(e) =>
                     setFormData({ ...formData, endTime: e.target.value })
                   }
-                  style={{ marginBottom: 10, width: "100%", padding: 8 }}
+                  style={{ marginBottom: 10, width: "100%", padding: 8 , cursor:"pointer"}}
+                  onClick={(e)=> e.target.showPicker()}
                 />
                 <button
                   onClick={handleAddLocation}

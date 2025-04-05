@@ -2,173 +2,239 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 const SavedRoutes = () => {
-  const [routes, setRoutes] = useState([]);
-  const [isTWRoute, setIsTWRoute] = useState(false); // Toggle for TW Routes
+  const [twRoutes, setTwRoutes] = useState([]);
+  const [normalRoutes, setNormalRoutes] = useState([]);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate(); // React Router's navigation hook
+  const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchRoutes = async () => {
-      setLoading(true);
-      try {
-        const response = await fetch(
-          isTWRoute
-            ? "http://localhost:3000/api/routes/fetchalltwroutes"
-            : "http://localhost:3000/api/routes/fetchallroutes",
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              "auth-token": `${localStorage.getItem("token")}`, // Include token for authentication
-            },
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch routes");
-        }
-
-        const data = await response.json();
-        setRoutes(data);
-      } catch (error) {
-        console.error("Error fetching routes:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchRoutes();
-  }, [isTWRoute]); // Refetch routes when the toggle changes
-
-  const handleDeleteRoute = async (id) => {
-    const confirmDelete = window.confirm("Are you sure you want to delete this route?");
-    if (!confirmDelete) return;
-
+  const fetchRoutes = async () => {
+    setLoading(true);
     try {
-      const response = await fetch(
-        isTWRoute
-          ? `http://localhost:3000/api/routes/deletetwroute/${id}`
-          : `http://localhost:3000/api/routes/deleteroute/${id}`,
-        {
-          method: "DELETE",
+      const [twRes, normalRes] = await Promise.all([
+        fetch("http://localhost:3000/api/routes/fetchalltwroutes", {
           headers: {
             "Content-Type": "application/json",
-            "auth-token": `${localStorage.getItem("token")}`, // Include token for authentication
+            "auth-token": localStorage.getItem("token"),
           },
-        }
-      );
+        }),
+        fetch("http://localhost:3000/api/routes/fetchallroutes", {
+          headers: {
+            "Content-Type": "application/json",
+            "auth-token": localStorage.getItem("token"),
+          },
+        }),
+      ]);
 
-      if (!response.ok) {
-        throw new Error("Failed to delete route");
-      }
+      if (!twRes.ok || !normalRes.ok) throw new Error("Fetch error");
 
-      const data = await response.json();
-      alert(data.Success);
+      const twData = await twRes.json();
+      const normalData = await normalRes.json();
 
-      // Remove the deleted route from the state
-      setRoutes((prevRoutes) => prevRoutes.filter((route) => route.id !== id));
+      setTwRoutes(twData);
+      setNormalRoutes(normalData);
     } catch (error) {
-      console.error("Error deleting route:", error);
-      alert("Failed to delete the route. Please try again.");
+      console.error("Error fetching routes:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchRoutes();
+  }, []);
+
+  const handleDeleteRoute = async (id, isTW) => {
+    const confirmDelete = window.confirm("Delete this route?");
+    if (!confirmDelete) return;
+
+    const url = isTW
+      ? `http://localhost:3000/api/routes/deletetwroute/${id}`
+      : `http://localhost:3000/api/routes/deleteroute/${id}`;
+
+    try {
+      const res = await fetch(url, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          "auth-token": localStorage.getItem("token"),
+        },
+      });
+
+      const result = await res.json();
+      alert(result.Success);
+
+      if (isTW) {
+        setTwRoutes((prev) => prev.filter((r) => r.id !== id));
+      } else {
+        setNormalRoutes((prev) => prev.filter((r) => r.id !== id));
+      }
+    } catch (error) {
+      alert("Failed to delete route.");
+      console.error(error);
     }
   };
 
   const handleRouteClick = (locations) => {
-    // Navigate to the RouteMap component and pass the locations array as state
     navigate("/route-map", { state: { locations } });
   };
 
-  return (
-    <div style={{ padding: "20px", color: "white" }}>
-      <h2>Saved Routes</h2>
-      <div style={{ marginBottom: "20px" }}>
-        <label style={{ marginRight: "10px" }}>Show Time-Windowed Routes</label>
-        <input
-          type="checkbox"
-          checked={isTWRoute}
-          onChange={() => setIsTWRoute(!isTWRoute)}
-        />
-      </div>
+  const logout = () => {
+    localStorage.removeItem("token");
+    navigate("/Login");
+  };
 
-      {loading ? (
-        <p>Loading routes...</p>
-      ) : routes.length === 0 ? (
-        <p>No routes found.</p>
-      ) : (
-        <div
-          style={{
-            maxHeight: "70vh",
-            overflowY: "auto",
-            backgroundColor: "#333",
-            padding: "10px",
-            borderRadius: "10px",
-            boxShadow: "0 2px 10px rgba(0,0,0,0.3)",
-          }}
-        >
-          {routes.map((route, routeIndex) => (
-            <div
-              key={route.id}
-              style={{
-                marginBottom: "20px",
-                padding: "10px",
-                backgroundColor: "#444",
-                borderRadius: "10px",
-                cursor: "pointer",
-              }}
-              onClick={() => handleRouteClick(route.locations)} // Redirect on click
+  return (
+    <>
+      <header className="text-gray-600 body-font">
+        <div className="container mx-auto flex flex-wrap px-5 py-5 flex-col md:flex-row items-center">
+          <a
+            href="/"
+            className="flex title-font font-medium items-center text-gray-900 mb-4 md:mb-0"
+          >
+            <svg
+              className="w-10 h-10 text-white p-2 bg-red-500 rounded-full"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
             >
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <h4>Route {routeIndex + 1}</h4>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation(); // Prevent triggering the route click
-                    handleDeleteRoute(route.id);
-                  }}
-                  style={{
-                    background: "none",
-                    border: "none",
-                    color: "red",
-                    cursor: "pointer",
-                    fontSize: "16px",
-                  }}
-                >
-                  🗑️
-                </button>
-              </div>
-              <ul>
-                {route.locations.map((location, locationIndex) => (
-                  <li
-                    key={location.id}
-                    style={{
-                      marginBottom: "10px",
-                      padding: "10px",
-                      backgroundColor: "#555",
-                      borderRadius: "5px",
-                    }}
-                  >
-                    <strong>Customer Name:</strong> {location.name}
-                    <br />
-                    <strong>Mobile:</strong> {location.phoneNumber}
-                    <br />
-                    {isTWRoute ? (
-                      <>
-                        <strong>Start Time:</strong> {location.startTime}
-                        <br />
-                        <strong>End Time:</strong> {location.endTime}
-                      </>
-                    ) : (
-                      <>
-                        <strong>Deadline:</strong> {location.time || "N/A"}
-                      </>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
+              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+            </svg>
+            <span className="ml-3 text-xl text-red-500">Path-Optimizer</span>
+          </a>
+          <div className="md:ml-auto flex gap-3">
+            <button
+              onClick={logout}
+              className="text-red-500 border border-red-500 py-1 px-3 hover:bg-red-100 rounded"
+            >
+              Logout
+            </button>
+          </div>
         </div>
-      )}
-    </div>
+      </header>
+
+      <div className="p-5 text-white">
+        <h2 className="text-3xl font-bold flex justify-center mb-10">Saved Routes</h2>
+
+        {loading ? (
+          <p>Loading routes...</p>
+        ) : (
+          <div className="flex flex-col lg:flex-row gap-6">
+            {/* Time-Windowed Routes */}
+            <div className="w-full lg:w-1/2 bg-gray-800 p-4 rounded-lg max-h-[70vh] overflow-y-auto shadow-lg">
+              <h3 className="text-xl font-semibold mb-3 text-red-400">
+                Time-Windowed Routes
+              </h3>
+              {twRoutes.length === 0 ? (
+                <p>No time-windowed routes found.</p>
+              ) : (
+                twRoutes.map((route, index) => (
+                  <div
+                    key={route.id}
+                    className="mb-5 bg-gray-700 p-4 rounded-lg"
+                  >
+                    <div
+                      className="flex justify-between items-center cursor-pointer"
+                      onClick={() => handleRouteClick(route.locations)}
+                    >
+                      <h4 className="font-medium">Route {index + 1}</h4>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteRoute(route.id, true);
+                        }}
+                        className="text-red-500 text-xl"
+                      >
+                        🗑️
+                      </button>
+                    </div>
+                    <table className="w-full mt-3 text-left table-auto">
+                      <thead className="bg-gray-600">
+                        <tr>
+                          <th className="px-4 py-2">Customer Name</th>
+                          <th className="px-4 py-2">Mobile</th>
+                          <th className="px-4 py-2">Start Time</th>
+                          <th className="px-4 py-2">End Time</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {route.locations.map((loc) => (
+                          <tr
+                            key={loc.id}
+                            className="hover:bg-gray-500 border-b border-gray-500"
+                          >
+                            <td className="px-4 py-2">{loc.name}</td>
+                            <td className="px-4 py-2">{loc.phoneNumber}</td>
+                            <td className="px-4 py-2">{loc.startTime}</td>
+                            <td className="px-4 py-2">{loc.endTime}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* Non-Time-Windowed Routes */}
+            <div className="w-full lg:w-1/2 bg-gray-800 p-4 rounded-lg max-h-[70vh] overflow-y-auto shadow-lg">
+              <h3 className="text-xl font-semibold mb-3 text-blue-400">
+                Deadline-Based Routes
+              </h3>
+              {normalRoutes.length === 0 ? (
+                <p>No normal routes found.</p>
+              ) : (
+                normalRoutes.map((route, index) => (
+                  <div
+                    key={route.id}
+                    className="mb-5 bg-gray-700 p-4 rounded-lg"
+                  >
+                    <div
+                      className="flex justify-between items-center cursor-pointer"
+                      onClick={() => handleRouteClick(route.locations)}
+                    >
+                      <h4 className="font-medium">Route {index + 1}</h4>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteRoute(route.id, false);
+                        }}
+                        className="text-red-500 text-xl"
+                      >
+                        🗑️
+                      </button>
+                    </div>
+                    <table className="w-full mt-3 text-left table-auto">
+                      <thead className="bg-gray-600">
+                        <tr>
+                          <th className="px-4 py-2">Customer Name</th>
+                          <th className="px-4 py-2">Mobile</th>
+                          <th className="px-4 py-2">Deadline</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {route.locations.map((loc) => (
+                          <tr
+                            key={loc.id}
+                            className="hover:bg-gray-500 border-b border-gray-500"
+                          >
+                            <td className="px-4 py-2">{loc.name}</td>
+                            <td className="px-4 py-2">{loc.phoneNumber}</td>
+                            <td className="px-4 py-2">{loc.time || "N/A"}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    </>
   );
 };
 
