@@ -67,7 +67,7 @@ const Register = () => {
           onSubmit={handleSubmit}
           className="lg:w-1/3 md:w-1/2 bg-white rounded-lg p-8 flex flex-col w-full mt-10 md:mt-0 relative z-10 shadow-md"
         >
-          <h2 className="text-gray-900 text-2xl mb-10 font-bold title-font flex justify-center">
+          <h2 className="text-gray-900 text-2xl mb-5 font-bold title-font flex justify-center">
             Register your account
           </h2>
 
@@ -123,12 +123,38 @@ const Register = () => {
               required
             />
           </div>
+          <div className="relative mb-4">
+            <label
+              htmlFor="timeToDestination"
+              className="leading-7 text-sm text-gray-600"
+            >
+              Time to reach destination (minutes)
+            </label>
+            <select
+              id="timeToDestination"
+              name="timeToDestination"
+              className="w-full bg-white rounded border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-2 px-3 leading-8 transition-colors duration-200 ease-in-out"
+              onChange={handleChange}
+              required
+            >
+              <option value="">Select time</option>
+              <option value="1">1 min</option>
+              <option value="3">3 min</option>
+              <option value="5">5 min</option>
+              <option value="10">10 min</option>
+              <option value="15">15 min</option>
+              <option value="20">20 min</option>
+              <option value="25">25 min</option>
+              <option value="30">30 min</option>
+            </select>
+          </div>
           <button
             type="submit"
             className="text-white bg-red-500 border-0 py-2 px-6 focus:outline-none hover:bg-red-600 rounded text-sm"
           >
             Register
           </button>
+
           <div className="register flex justify-center py-5">
             <a href="/Login">
               <span className="text-indigo-500">Existing User(Login)</span>

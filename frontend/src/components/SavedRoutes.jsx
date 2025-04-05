@@ -3,7 +3,7 @@ import React from 'react'
 const SavedRoutes = () => {
   return (
     <>
-    <div>
+    <div className='text-white'>
       SavedRoutes 
     </div>
     </>
