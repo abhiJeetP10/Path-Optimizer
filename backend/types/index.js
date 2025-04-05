@@ -28,4 +28,32 @@ const TravelTimesSchema = z.object({
   waitTime: z.number().nonnegative(),
 });
 
-module.exports = { CreateUserSchema, AuthenticateUserSchema, TravelTimesSchema };
+const UpdateUserSchema = z.object({
+  name: z.string().min(3).max(50),
+  email: z.string().email(),
+  mobile: z.string().min(10).max(15),
+  image: z.string().optional(),
+  gender: z.string().optional(),
+  waitTime: z.string().optional(),
+});
+
+const ResetPasswordSchema = z.object({
+  email: z.string().email(),
+  code: z.string(),
+  newPassword: z.string().min(5).max(30),
+});
+
+const UpdatePasswordSchema = z.object({
+  token: z.string(),
+  currentPassword: z.string().min(5).max(30),
+  newPassword: z.string().min(5).max(30),
+});
+
+module.exports = {
+  CreateUserSchema,
+  AuthenticateUserSchema,
+  TravelTimesSchema,
+  UpdateUserSchema,
+  ResetPasswordSchema,
+  UpdatePasswordSchema,
+};
