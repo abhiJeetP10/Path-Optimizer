@@ -13,13 +13,13 @@ import {
 function App() {
 
   return (
-    <div className="App">
+    <div className="App bg-black h-screen">
     {/* <RoutesState> */}
      <BrowserRouter>
  
          <Routes>
            <Route exact path="/login" element={<Login />} />
-           <Route exact path="/signup" element={<Register />} />
+           <Route exact path="/Register" element={<Register />} />
            <Route exact path="/" element={<Dashboard />} />
            <Route exact path="/map" element={<Map1 />} />
            {/* <Route exact path="/showroute" element={<ShowRoute showAlert={showAlert}/>} /> */}
