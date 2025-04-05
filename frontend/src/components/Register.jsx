@@ -130,7 +130,7 @@ const Register = () => {
               htmlFor="waitTIme"
               className="leading-7 text-sm text-gray-600"
             >
-              Time to reach destination (minutes)
+              Time to wait at destination (minutes)
             </label>
             <select
               id="waitTIme"
