@@ -562,7 +562,13 @@ const Map1 = () => {
                   onChange={(e) =>
                     setFormData({ ...formData, startTime: e.target.value })
                   }
-                  style={{ marginBottom: 10, width: "100%", padding: 8 }}
+                  onClick={(e) => e.target.showPicker()}
+                  style={{
+                    marginBottom: 10,
+                    width: "100%",
+                    padding: 8,
+                    cursor: "pointer",
+                  }}
                 />
                 <input
                   type="time"
@@ -571,7 +577,13 @@ const Map1 = () => {
                   onChange={(e) =>
                     setFormData({ ...formData, endTime: e.target.value })
                   }
-                  style={{ marginBottom: 10, width: "100%", padding: 8 }}
+                  onClick={(e) => e.target.showPicker()}
+                  style={{
+                    marginBottom: 10,
+                    width: "100%",
+                    padding: 8,
+                    cursor: "pointer",
+                  }}
                 />
                 <button
                   onClick={handleAddLocation}
@@ -629,28 +641,30 @@ const Map1 = () => {
                   {directionsResponse.routes[0].legs.map((leg, legIndex) => (
                     <div key={legIndex} style={{ marginBottom: "10px" }}>
                       <div className="border py-2 px-2">
-                      <div className="">
-                      <div className="text-lg pb-1">Path:- {legIndex+1}</div>
-                        <strong>From:</strong> <br /> {leg.start_address}
-                        <br />
-                      </div>
-                      <div className="py-2">
-                        <strong>To:</strong>
-                        <br /> {leg.end_address}
-                        <br />
-                      </div>
-                      <ul style={{ marginTop: "5px" }}>
-                        {leg.steps.map((step, stepIndex) => (
-                          <li
-                            key={stepIndex}
-                            dangerouslySetInnerHTML={{
-                              __html: step.instructions,
-                            }}
-                            style={{ fontSize: "14px", marginBottom: "5px" }}
-                            className="text-stone-200"
-                          ></li>
-                        ))}
-                      </ul>
+                        <div className="">
+                          <div className="text-lg pb-1">
+                            Path:- {legIndex + 1}
+                          </div>
+                          <strong>From:</strong> <br /> {leg.start_address}
+                          <br />
+                        </div>
+                        <div className="py-2">
+                          <strong>To:</strong>
+                          <br /> {leg.end_address}
+                          <br />
+                        </div>
+                        <ul style={{ marginTop: "5px" }}>
+                          {leg.steps.map((step, stepIndex) => (
+                            <li
+                              key={stepIndex}
+                              dangerouslySetInnerHTML={{
+                                __html: step.instructions,
+                              }}
+                              style={{ fontSize: "14px", marginBottom: "5px" }}
+                              className="text-stone-200"
+                            ></li>
+                          ))}
+                        </ul>
                       </div>
                     </div>
                   ))}
