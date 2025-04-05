@@ -6,6 +6,7 @@ const CreateUserSchema = z.object({
   email: z.string().email(),
   password: z.string().min(5).max(30),
   mobile: z.string().min(10).max(15),
+  waitTime: z.string().optional(),
 });
 
 const AuthenticateUserSchema = z.object({
