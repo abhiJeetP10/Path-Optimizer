@@ -4,11 +4,26 @@ const router = express.Router();
 const axios = require("axios");
 const { TravelTimesSchema } = require("../types/index");
 
-router.post("/get-travel-times", async (req, res) => {
-  if (!TravelTimesSchema.safeParse(req.body).success) {
-    console.error("Invalid input format");
-    return res.status(400).json({ error: "Invalid input format" });
+router.post("/directions", async (req, res) => {
+  const { origin, destination, waypoints } = req.body;
+
+  const url = `https://maps.googleapis.com/maps/api/directions/json?origin=${origin}&destination=${destination}&waypoints=${waypoints}&key=${process.env.GOOGLE_MAPS_API_KEY}`;
+
+  try {
+    const response = await fetch(url);
+    const data = await response.json();
+    res.json(data);
+  } catch (error) {
+    console.error("Error fetching directions:", error);
+    res.status(500).json({ error: "Failed to fetch directions" });
   }
+});
+
+router.post("/get-travel-times", async (req, res) => {
+  // if (!TravelTimesSchema.safeParse(req.body).success) {
+  //   console.error("Invalid input format");
+  //   return res.status(400).json({ error: "Invalid input format" });
+  // }
   const { locations, timeWindows, numVehicles, startTime, waitTime } = req.body;
   console.log("Request Body:", req.body);
 
