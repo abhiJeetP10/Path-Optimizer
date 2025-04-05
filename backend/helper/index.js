@@ -62,6 +62,8 @@ async function getTravelTimes(locations) {
   //   }
   //   return batches;
   // };
+  // Splits the locations array into smaller batches of size maxBatchSize
+  // using Array.from to create an array of batches.
   const createBatches = (locations, maxBatchSize) =>
     Array.from({ length: Math.ceil(locations.length / maxBatchSize) }, (_, i) =>
       locations.slice(i * maxBatchSize, i * maxBatchSize + maxBatchSize)

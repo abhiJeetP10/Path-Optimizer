@@ -7,6 +7,7 @@ const Register = () => {
     name: "",
     email: "",
     password: "",
+    waitTIme: "", // Added waitTIme to formData
   });
 
   const [error, setError] = useState("");
@@ -14,11 +15,12 @@ const Register = () => {
 
   const navigate = useNavigate();
 
+  // Handle input changes
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
+    const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setSuccess("");
@@ -27,7 +29,7 @@ const Register = () => {
       const response = await axios.post(
         "http://localhost:3000/api/auth/createuser", // Replace with your backend URL
         { ...formData, mobile: "1234567890" }, // Add mobile if required
-        // You can remove the mobile field if not needed
+// You can remove the mobile field if not needed
         // and adjust the backend accordingly
         {
           headers: {
@@ -38,9 +40,9 @@ const Register = () => {
 
       if (response.data.success) {
         setSuccess("Account created successfully!");
-        setFormData({ name: "", email: "", password: "" });
-        localStorage.setItem("token", response.data.authtoken);
-        navigate("/");
+        setFormData({ name: "", email: "", password: "", waitTIme: "" }); // Reset form
+        localStorage.setItem("token", response.data.authtoken); // Save token to localStorage
+        navigate("/"); // Redirect to the dashboard
       }
     } catch (err) {
       console.error("Error creating account:", err);
@@ -125,19 +127,20 @@ const Register = () => {
           </div>
           <div className="relative mb-4">
             <label
-              htmlFor="timeToDestination"
+              htmlFor="waitTIme"
               className="leading-7 text-sm text-gray-600"
             >
               Time to reach destination (minutes)
             </label>
             <select
-              id="timeToDestination"
-              name="timeToDestination"
-              className="w-full bg-white rounded border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-2 px-3 leading-8 transition-colors duration-200 ease-in-out"
+              id="waitTIme"
+              name="waitTIme"
+              value={formData.waitTIme}
               onChange={handleChange}
+              className="w-full bg-white rounded border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-2 px-3 leading-8 transition-colors duration-200 ease-in-out"
               required
             >
-              <option value="">Select time</option>
+              <option value="">Wait time</option>
               <option value="1">1 min</option>
               <option value="3">3 min</option>
               <option value="5">5 min</option>

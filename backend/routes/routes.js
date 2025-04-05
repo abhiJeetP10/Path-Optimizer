@@ -39,7 +39,7 @@ router.post("/addroute", fetchuser, async (req, res) => {
             name: location.name,
             latitude: location.latitude,
             longitude: location.longitude,
-            time: location.time,
+            time: location.deadline,
           })),
         },
       },
@@ -47,19 +47,6 @@ router.post("/addroute", fetchuser, async (req, res) => {
         locations: true,
       },
     });
-    // await prisma.$transaction(async (prisma) => {
-    //   const route = await prisma.route.update({
-    //     where: { id },
-    //     data: { name: "Updated Route" },
-    //   });
-
-    //   await prisma.location.createMany({
-    //     data: newLocations.map((location) => ({
-    //       routeId: id,
-    //       ...location,
-    //     })),
-    //   });
-    // });
 
     res.status(201).json(newRoute);
   } catch (error) {
@@ -250,6 +237,7 @@ router.get("/fetchalltwroutes", fetchuser, async (req, res) => {
   try {
     const routes = await prisma.tWRoute.findMany({
       where: { userId: req.user.id },
+      include: { locations: true },
     });
     res.json(routes);
   } catch (err) {
@@ -260,7 +248,7 @@ router.get("/fetchalltwroutes", fetchuser, async (req, res) => {
 
 router.delete("/deletetwroute/:id", fetchuser, async (req, res) => {
   try {
-    const route = await prisma.twRoute.findUnique({
+    const route = await prisma.tWRoute.findUnique({
       where: { id: req.params.id },
     });
 
@@ -272,7 +260,7 @@ router.delete("/deletetwroute/:id", fetchuser, async (req, res) => {
       return res.status(401).send("Not allowed");
     }
 
-    await prisma.twRoute.delete({
+    await prisma.tWRoute.delete({
       where: { id: req.params.id },
     });
 
@@ -291,28 +279,31 @@ router.delete(
 
     try {
       // Find the route by ID
-      const route = await prisma.twRoute.findUnique({
+      const route = await prisma.tWRoute.findUnique({
         where: { id: routeId },
+        include: { locations: true },
       });
 
       if (!route) {
         return res.status(404).json({ message: "Route not found" });
       }
 
-      // Filter out the customer from the route's locations array
-      const updatedLocations = route.locations.filter(
-        (customer) => customer.id !== customerId
+      const customerExists = route.locations.some(
+        (customer) => customer.id === customerId
       );
 
-      // Update the route with the new locations array
-      const updatedRoute = await prisma.twRoute.update({
-        where: { id: routeId },
-        data: { locations: updatedLocations },
+      if (!customerExists) {
+        return res
+          .status(404)
+          .json({ message: "Customer not found in this route" });
+      }
+
+      // Delete the customer from the locations relation
+      await prisma.tWLocation.delete({
+        where: { id: customerId },
       });
 
-      res
-        .status(200)
-        .json({ message: "Customer deleted successfully", updatedRoute });
+      res.status(200).json({ message: "Customer deleted successfully" });
     } catch (error) {
       console.error("Error deleting customer:", error);
       res.status(500).json({ message: "Internal Server Error" });
@@ -328,33 +319,34 @@ router.put(
     const { newStartTime, newEndTime } = req.body;
 
     try {
-      const route = await prisma.twRoute.findUnique({
+      const route = await prisma.tWRoute.findUnique({
         where: { id: routeId },
+        include: { locations: true },
       });
 
       if (!route) {
         return res.status(404).json({ message: "Route not found" });
       }
 
-      const updatedLocations = route.locations.map((customer) => {
-        if (customer.id === customerId) {
-          return {
-            ...customer,
-            startTime: newStartTime,
-            endTime: newEndTime,
-          };
-        }
-        return customer;
+      const customerExists = route.locations.some(
+        (customer) => customer.id === customerId
+      );
+
+      if (!customerExists) {
+        return res
+          .status(404)
+          .json({ message: "Customer not found in this route" });
+      }
+
+      await prisma.tWLocation.update({
+        where: { id: customerId },
+        data: {
+          startTime: newStartTime,
+          endTime: newEndTime,
+        },
       });
 
-      const updatedRoute = await prisma.twRoute.update({
-        where: { id: routeId },
-        data: { locations: updatedLocations },
-      });
-
-      res
-        .status(200)
-        .json({ message: "Customer time updated successfully", updatedRoute });
+      res.status(200).json({ message: "Customer time updated successfully" });
     } catch (error) {
       console.error("Error updating customer time:", error);
       res.status(500).json({ message: "Internal Server Error" });
@@ -363,13 +355,27 @@ router.put(
 );
 
 router.put("/updatetwroute/:id", fetchuser, async (req, res) => {
-  const { id } = req.params; // ID of the route
-  const { newLocations } = req.body; // New locations array to replace
+  const { id } = req.params;
+  const { newLocations } = req.body;
 
   try {
-    const route = await prisma.twRoute.update({
+    // Update the route with nested updates for locations
+    const route = await prisma.tWRoute.update({
       where: { id },
-      data: { locations: newLocations },
+      data: {
+        locations: {
+          deleteMany: {}, // Delete all existing locations for this route
+          create: newLocations.map((location) => ({
+            name: location.name,
+            latitude: location.lat,
+            longitude: location.lng,
+            startTime: location.startTime,
+            endTime: location.endTime,
+            phoneNumber: location.mobile,
+          })),
+        },
+      },
+      include: { locations: true },
     });
 
     res.status(200).json({ message: "Route updated successfully", route });
