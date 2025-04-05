@@ -248,7 +248,7 @@ router.post("/addtwroute", fetchuser, async (req, res) => {
 
 router.get("/fetchalltwroutes", fetchuser, async (req, res) => {
   try {
-    const routes = await prisma.twRoute.findMany({
+    const routes = await prisma.tWRoute.findMany({
       where: { userId: req.user.id },
     });
     res.json(routes);
