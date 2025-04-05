@@ -1,4 +1,4 @@
 Flask==3.0.1
 gunicorn
-ortools==9.10.4067
+ortools
 Flask-Cors==4.0.1

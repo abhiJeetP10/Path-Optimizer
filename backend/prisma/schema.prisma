@@ -54,6 +54,7 @@ model Route {
 
 model TWLocation {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  name String
   latitude  Float
   longitude Float
   startTime      String
