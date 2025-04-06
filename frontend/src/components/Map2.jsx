@@ -30,12 +30,12 @@ const Map2 = () => {
   const [cl, setCL] = useState(null);
   const [optimizedRoute, setOptimizedRoute] = useState(null);
   const [optimizeWayPoints, setOptimizeWaypoints] = useState(false);
-  const API_KEY = "AIzaSyAH8zoNx77UvZIH0H6xmHIHeNlLlhcuD3s";
+  const API_KEY = import.meta.env.VITE_GMAP_API;
   const mapRef = useRef(null);
   const searchBoxRef = useRef(null);
 
   const { isLoaded } = useJsApiLoader({
-    googleMapsApiKey: "AIzaSyAH8zoNx77UvZIH0H6xmHIHeNlLlhcuD3s",
+    googleMapsApiKey: import.meta.env.VITE_GMAP_API,
     libraries: ["places"],
   });
 
