@@ -31,11 +31,10 @@ const Dashboard = () => {
                         Time Windows
                       </h2>
                       <p className="leading-relaxed mb-3">
-                        Photo booth fam kinfolk cold-pressed sriracha leggings
-                        jianbing microdosing tousled waistcoat.
+                        Get optimized routes for constraints with time windows.
                       </p>
                       <div className="flex items-center flex-wrap justify-center text-red-500">
-                        Learn More
+                        Go
                         <svg
                           className="w-4 h-4 ml-2"
                           viewBox="0 0 24 24"
@@ -58,7 +57,7 @@ const Dashboard = () => {
               <div className="p-4 md:w-1/3">
                 <a
                   className="inline-flex items-center md:mb-2 lg:mb-0"
-                  href="#"
+                  href="/map2"
                 >
                   <div className="h-full border-2 border-gray-200 border-opacity-60 rounded-lg overflow-hidden transform transition duration-300 hover:scale-105">
                     {/* <img
@@ -76,11 +75,10 @@ const Dashboard = () => {
                         Deadlines
                       </h2>
                       <p className="leading-relaxed mb-3">
-                        Photo booth fam kinfolk cold-pressed sriracha leggings
-                        jianbing microdosing tousled waistcoat.
+                      Get optimized routes to meet constraints with deadlines.
                       </p>
                       <div className="flex items-center flex-wrap justify-center text-red-500 ">
-                        Learn More
+                        Go
                         <svg
                           className="w-4 h-4 ml-2"
                           viewBox="0 0 24 24"
@@ -116,11 +114,10 @@ const Dashboard = () => {
                         Saved Routes
                       </h2>
                       <p className="leading-relaxed mb-3">
-                        Photo booth fam kinfolk cold-pressed sriracha leggings
-                        jianbing microdosing tousled waistcoat.
+                        View your previously saved routes and manage them.
                       </p>
                       <div className="flex items-center flex-wrap justify-center text-red-500">
-                        Learn More
+                        Go
                         <svg
                           className="w-4 h-4 ml-2"
                           viewBox="0 0 24 24"

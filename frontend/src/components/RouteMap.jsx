@@ -8,13 +8,17 @@ import {
   DirectionsService,
   DirectionsRenderer,
 } from "@react-google-maps/api";
+import { useLocation } from "react-router-dom";
+
 
 const containerStyle = {
   width: "100%",
   height: "calc(100vh - 60px)",
 };
 
-const Map2 = () => {
+const RouteMap = () => {
+    const { state } = useLocation(); // Access the passed locations array
+  const { locations: passedLocations } = state || {};
   const [currentPosition, setCurrentPosition] = useState(null);
   const [selectedPosition, setSelectedPosition] = useState(null);
   const [locations, setLocations] = useState([]);
@@ -22,7 +26,8 @@ const Map2 = () => {
   const [formData, setFormData] = useState({
     name: "",
     mobile: "",
-    deadline: "",
+    startTime: "",
+    endTime: "",
   });
   const [presentTime, setPresentTime] = useState(new Date());
   const [directionsResponse, setDirectionsResponse] = useState(null);
@@ -42,18 +47,22 @@ const Map2 = () => {
   useEffect(() => {
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        const coords = {
-          lat: position.coords.latitude,
-          lng: position.coords.longitude,
-        };
-        setCurrentPosition(coords);
-        setLocations([{ ...coords, isCurrent: true }]);
-      },
-      (error) => {
-        console.error("Error getting location: ", error);
-        const fallback = { lat: 28.6139, lng: 77.209 };
-        setCurrentPosition(fallback);
-        setLocations([{ ...fallback, isCurrent: true }]);
+        const currentLocation = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+            isCurrent: true,
+          };
+
+          // Set the current location and prepend it to the passed locations
+          setCurrentPosition(currentLocation);
+          setLocations([currentLocation, ...(passedLocations || [])]);
+        },
+        (error) => {
+          console.error("Error getting current location:", error);
+          // Fallback to a default location if geolocation fails
+          const fallbackLocation = { lat: 28.6139, lng: 77.209, isCurrent: true }; // Default to Delhi
+          setCurrentPosition(fallbackLocation);
+          setLocations([fallbackLocation, ...(passedLocations || [])]);
       }
     );
   }, []);
@@ -96,11 +105,16 @@ const Map2 = () => {
       lat: e.latLng.lat(),
       lng: e.latLng.lng(),
     });
-    setFormData({ name: "", mobile: "", deadline: "" });
+    setFormData({ name: "", mobile: "", startTime: "", endTime: "" });
   };
 
   const handleAddLocation = () => {
-    if (formData.name && formData.mobile && formData.deadline) {
+    if (
+      formData.name &&
+      formData.mobile &&
+      formData.startTime &&
+      formData.endTime
+    ) {
       setLocations((prev) => [
         ...prev,
         {
@@ -119,7 +133,7 @@ const Map2 = () => {
   const handleSaveRoute = async () => {
     try {
       const response = await fetch(
-        "http://localhost:3000/api/routes/addroute",
+        "http://localhost:3000/api/routes/addtwroute",
         {
           method: "POST",
           headers: {
@@ -175,7 +189,10 @@ const Map2 = () => {
       ],
       ...locations
         .slice(1)
-        .map((location) => ["0:0", removeLeadingZeros(location.deadline)]),
+        .map((location) => [
+          removeLeadingZeros(location.startTime),
+          removeLeadingZeros(location.endTime),
+        ]),
     ];
 
     console.log("Latitude and Longitude Array:", latLongArray);
@@ -240,23 +257,20 @@ const Map2 = () => {
           .slice(1) // Exclude the first point which is the origin
           .map((coordinate) => `${coordinate.latitude},${coordinate.longitude}`)
           .join("|");
-
-        // Call Directions API for shortest path
+        
         const origin = `${latLongArray[0].latitude},${latLongArray[0].longitude}`;
         const destination = `${latLongArray[0].latitude},${latLongArray[0].longitude}`;
+        // Call Directions API for shortest path
         // const url = `https://maps.googleapis.com/maps/api/directions/json?origin=${latLongArray[0].latitude},${latLongArray[0].longitude}&destination=${latLongArray[0].latitude},${latLongArray[0].longitude}&waypoints=optimize:true|${waypoints}&key=${API_KEY}`;
 
         try {
-          const response = await fetch(
-            "http://localhost:3000/helper/directions",
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({ origin, destination, waypoints }),
-            }
-          );
+          const response = await fetch("http://localhost:3000/helper/directions", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ origin, destination, waypoints }),
+          });
           const data = await response.json();
 
           if (!data.routes || data.routes.length === 0) {
@@ -322,43 +336,39 @@ const Map2 = () => {
       // Store the optimized route coordinates
       setOptimizedRoute(optimizedRouteCoordinates);
       if (optimizedRouteCoordinates && optimizedRouteCoordinates.length > 1) {
-        const waypoints = optimizedRouteCoordinates
-          .slice(1, -1)
-          .map((point) => ({
-            location: { lat: point.latitude, lng: point.longitude },
-            stopover: true,
-          }));
-
-        const origin = {
-          lat: optimizedRouteCoordinates[0].latitude,
-          lng: optimizedRouteCoordinates[0].longitude,
-        };
-
-        const destination = {
-          lat: optimizedRouteCoordinates[optimizedRouteCoordinates.length - 1]
-            .latitude,
-          lng: optimizedRouteCoordinates[optimizedRouteCoordinates.length - 1]
-            .longitude,
-        };
-
-        const directionsService = new window.google.maps.DirectionsService();
-        directionsService.route(
-          {
-            origin,
-            destination,
-            waypoints,
-            travelMode: window.google.maps.TravelMode.DRIVING,
-          },
-          (result, status) => {
-            if (status === window.google.maps.DirectionsStatus.OK) {
-              setDirectionsResponse(result);
-              console.log(result); // Update the directionsResponse state
-            } else {
-              console.error(`Error fetching directions: ${status}`);
-            }
+            const waypoints = optimizedRouteCoordinates.slice(1, -1).map((point) => ({
+              location: { lat: point.latitude, lng: point.longitude },
+              stopover: true,
+            }));
+      
+            const origin = {
+              lat: optimizedRouteCoordinates[0].latitude,
+              lng: optimizedRouteCoordinates[0].longitude,
+            };
+      
+            const destination = {
+              lat: optimizedRouteCoordinates[optimizedRouteCoordinates.length - 1].latitude,
+              lng: optimizedRouteCoordinates[optimizedRouteCoordinates.length - 1].longitude,
+            };
+      
+            const directionsService = new window.google.maps.DirectionsService();
+            directionsService.route(
+              {
+                origin,
+                destination,
+                waypoints,
+                travelMode: window.google.maps.TravelMode.DRIVING,
+              },
+              (result, status) => {
+                if (status === window.google.maps.DirectionsStatus.OK) {
+                  setDirectionsResponse(result);
+                  console.log(result) // Update the directionsResponse state
+                } else {
+                  console.error(`Error fetching directions: ${status}`);
+                }
+              }
+            );
           }
-        );
-      }
       console.log("Optimized Route:", optimizedRoute);
     } catch (error) {
       if (error.name === "AbortError") {
@@ -373,8 +383,7 @@ const Map2 = () => {
 
   return (
     <div>
-      {/* Navbar */}
-
+      {/* new nav */}
       <nav>
         <header className="text-gray-600 body-font">
           <div className="w-full flex flex-wrap px-10 py-5 flex-col md:flex-row items-center">
@@ -469,7 +478,7 @@ const Map2 = () => {
         </header>
       </nav>
 
-      {/* Map */}
+      {/* Map + Sidebar */}
       {isLoaded && currentPosition ? (
         <div
           className="flex"
@@ -479,61 +488,55 @@ const Map2 = () => {
             width: "100%",
           }}
         >
-        <div
+          {/* Google Map Section */}
+          <div
             style={{
               width: locations.length > 1 ? "70%" : "100%",
               transition: "width 0.3s ease",
             }}
           >
-          <GoogleMap
-            mapContainerStyle={{ width: "100%", height: "100%" }}
-            center={currentPosition}
-            zoom={14}
-            onLoad={(map) => (mapRef.current = map)}
-            onClick={handleMapClick}
-          >
-            {/* Render Directions */}
-            {directionsResponse && (
-              <DirectionsRenderer directions={directionsResponse} />
-            )}
-            {/* Markers */}
-            {!optimizedRoute &&
-              locations.map((loc, idx) => (
-                <Marker
-                  key={idx}
-                  position={{ lat: loc.lat, lng: loc.lng }}
-                  onClick={() => setActiveInfo(idx)}
-                  icon={
-                    loc.isCurrent
-                      ? undefined
-                      : "http://maps.google.com/mapfiles/ms/icons/red-dot.png"
-                  }
-                >
-                  {activeInfo === idx && (
-                    <InfoWindow onCloseClick={() => setActiveInfo(null)}>
-                      <div>
-                        {loc.isCurrent ? (
-                          <b>Current Location</b>
-                        ) : (
-                          <>
+            <GoogleMap
+              mapContainerStyle={{ width: "100%", height: "100%" }}
+              center={currentPosition}
+              zoom={14}
+              onLoad={(map) => (mapRef.current = map)}
+              onClick={handleMapClick}
+            >
+              {directionsResponse && (
+                <DirectionsRenderer directions={directionsResponse} />
+              )}
+              {!optimizedRoute &&
+                locations.map((loc, idx) => (
+                  <Marker
+                    key={idx}
+                    position={{ lat: loc.lat, lng: loc.lng }}
+                    onClick={() => setActiveInfo(idx)}
+                    icon={
+                      loc.isCurrent
+                        ? undefined
+                        : "http://maps.google.com/mapfiles/ms/icons/red-dot.png"
+                    }
+                  >
+                    {activeInfo === idx && (
+                      <InfoWindow onCloseClick={() => setActiveInfo(null)}>
+                        <div>
+                          {loc.isCurrent ? (
+                            <b>Current Location</b>
+                          ) : (
                             <div>{loc.name}</div>
-                          </>
-                        )}
-                      </div>
-                    </InfoWindow>
-                  )}
-                </Marker>
-              ))}
+                          )}
+                        </div>
+                      </InfoWindow>
+                    )}
+                  </Marker>
+                ))}
+              {selectedPosition && <Marker position={selectedPosition} />}
+            </GoogleMap>
 
-            {/* New Marker + Carousel */}
-            {selectedPosition && <Marker position={selectedPosition} />}
-          </GoogleMap>
-
-          {/* Carousel-style Form */}
-          {/* Carousel-style Form */}
-          {selectedPosition && (
-            <div
-              style={{
+            {/* Carousel-style Form */}
+            {selectedPosition && (
+              <div
+                style={{
                   position: "absolute",
                   bottom: "20px", // slightly below navbar
                   left: "10px", // left side
@@ -544,43 +547,52 @@ const Map2 = () => {
                   boxShadow: "0 2px 10px rgba(0,0,0,0.3)",
                   width: "300px",
                   zIndex: 9999,
-              }}
-            >
-              <h4 className="mx-auto flex justify-center text-xl underline underline-offset-2 mb-4">Add Location</h4>
-              <input
-                type="text"
-                placeholder="Customer Name"
-                className="flex text-center border rounded-md"
-                value={formData.name}
-                onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
-                }
-                style={{ marginBottom: 10, width: "100%", padding: 8 }}
-              />
-              <input
-                type="text"
-                placeholder="Mobile Number"
-                className="flex text-center border rounded-md"
-                value={formData.mobile}
-                onChange={(e) =>
-                  setFormData({ ...formData, mobile: e.target.value })
-                }
-                style={{ marginBottom: 10, width: "100%", padding: 8}}
-              />
-              <input
-                type="time"
-                placeholder="Deadline"
-                className="w-full flex justify-center border rounded-md py-2 mb-3"
-                value={formData.deadline}
-                onChange={(e) =>
-                  setFormData({ ...formData, deadline: e.target.value , cursor:"pointer"})
-                }
-                onClick={(e)=> e.target.showPicker()}
-              />
-
-              <button
-                onClick={handleAddLocation}
-                className="bg-red-500"
+                }}
+              >
+                <h4 className="mx-auto flex justify-center text-xl underline underline-offset-2 mb-4">
+                  Add Location
+                </h4>
+                <input
+                  type="text"
+                  placeholder="Customer Name"
+                  className="flex text-center border rounded-md"
+                  value={formData.name}
+                  onChange={(e) =>
+                    setFormData({ ...formData, name: e.target.value })
+                  }
+                  style={{ marginBottom: 10, width: "100%", padding: 8 }}
+                />
+                <input
+                  type="text"
+                  placeholder="Mobile Number"
+                  className="flex text-center border rounded-md"
+                  value={formData.mobile}
+                  onChange={(e) =>
+                    setFormData({ ...formData, mobile: e.target.value })
+                  }
+                  style={{ marginBottom: 10, width: "100%", padding: 8 }}
+                />
+                <input
+                  type="time"
+                  value={formData.startTime}
+                  className="flex justify-center border rounded-md"
+                  onChange={(e) =>
+                    setFormData({ ...formData, startTime: e.target.value })
+                  }
+                  style={{ marginBottom: 10, width: "100%", padding: 8 }}
+                />
+                <input
+                  type="time"
+                  value={formData.endTime}
+                  className="flex justify-center border rounded-md"
+                  onChange={(e) =>
+                    setFormData({ ...formData, endTime: e.target.value })
+                  }
+                  style={{ marginBottom: 10, width: "100%", padding: 8 }}
+                />
+                <button
+                  onClick={handleAddLocation}
+                  className="bg-red-500"
                   style={{
                     width: "100%",
                     padding: "10px",
@@ -590,29 +602,28 @@ const Map2 = () => {
                     cursor: "pointer",
                     marginBottom: "10px",
                   }}
-              >
-                Add Location
-              </button>
-              <button
-                onClick={() => setSelectedPosition(null)}
-                style={{
-                  width: "100%",
-                  padding: "10px",
-                  backgroundColor: "#ccc",
-                  color: "#333",
-                  border: "none",
-                  borderRadius: "5px",
-                  cursor: "pointer",
-                }}
-              >
-                Cancel
-              </button>
-            </div>
-          )}
+                >
+                  Add Location
+                </button>
+                <button
+                  onClick={() => setSelectedPosition(null)}
+                  style={{
+                    width: "100%",
+                    padding: "10px",
+                    backgroundColor: "#ccc",
+                    color: "#333",
+                    border: "none",
+                    borderRadius: "5px",
+                    cursor: "pointer",
+                  }}
+                >
+                  Cancel
+                </button>
+              </div>
+            )}
           </div>
 
-          {/* Sidebar over Map */}
-          {/* Sidebar over Map */}
+          {/* Sidebar Panel */}
           {locations.length > 1 && (
             <div
               style={{
@@ -627,9 +638,10 @@ const Map2 = () => {
                 zIndex: 10,
               }}
             >
-              <h4 className="mx-2 my-2 text-2xl font-semibold text-center underline underline-offset-2">{directionsResponse ? "Directions" : "Customers"}</h4>
+              <h4 className="mx-2 my-2 text-2xl font-semibold text-center underline underline-offset-2">
+                {directionsResponse ? "Directions" : "Customers"}
+              </h4>
               {directionsResponse ? (
-                // Show textual directions
                 <div className="mx-2 my-2">
                   {directionsResponse.routes[0].legs.map((leg, legIndex) => (
                     <div key={legIndex} style={{ marginBottom: "10px" }}>
@@ -661,7 +673,6 @@ const Map2 = () => {
                   ))}
                 </div>
               ) : (
-                // Show added customers
                 locations
                   .filter((loc) => !loc.isCurrent)
                   .map((loc, idx) => (
@@ -683,7 +694,7 @@ const Map2 = () => {
                         </div>
                         <div className="text-md mx-2 mt-3 mb-3">
                           <span className="font-semibold">Time:-</span>{" "}
-                          {loc.deadline}
+                          {loc.startTime} - {loc.endTime}
                         </div>
                         <div className="text-md mx-2 mt-3 mb-3">
                           <span className="font-semibold">Mobile No:- </span>
@@ -694,7 +705,7 @@ const Map2 = () => {
                         onClick={() => {
                           const updated = locations.filter(
                             (_, i) => i !== idx + 1
-                          ); // +1 to skip current location
+                          );
                           setLocations(updated);
                         }}
                         style={{
@@ -721,4 +732,4 @@ const Map2 = () => {
   );
 };
 
-export default Map2;
+export default RouteMap;

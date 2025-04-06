@@ -37,8 +37,8 @@ router.post("/addroute", fetchuser, async (req, res) => {
         locations: {
           create: locations.map((location) => ({
             name: location.name,
-            latitude: location.latitude,
-            longitude: location.longitude,
+            latitude: location.lat,
+            longitude: location.lng,
             time: location.deadline,
           })),
         },
@@ -70,6 +70,11 @@ router.delete("/deleteroute/:id", fetchuser, async (req, res) => {
       return res.status(401).send("Not allowed");
     }
 
+    await prisma.location.deleteMany({
+      where: { routeId: req.params.id },
+    });
+
+    // Delete the Route
     await prisma.route.delete({
       where: { id: req.params.id },
     });
@@ -260,11 +265,18 @@ router.delete("/deletetwroute/:id", fetchuser, async (req, res) => {
       return res.status(401).send("Not allowed");
     }
 
+    await prisma.tWLocation.deleteMany({
+      where: { routeId: req.params.id },
+    });
+
+    // Delete the TWRoute
     await prisma.tWRoute.delete({
       where: { id: req.params.id },
     });
 
-    res.json({ Success: "Route has been deleted", route });
+    res.json({ Success: "Route and its locations have been deleted", route });
+
+    // res.json({ Success: "Route has been deleted", route });
   } catch (err) {
     console.log(err.message);
     res.status(500).send("Internal Server error");

@@ -31,12 +31,12 @@ const Map1 = () => {
   const [cl, setCL] = useState(null);
   const [optimizedRoute, setOptimizedRoute] = useState(null);
   const [optimizeWayPoints, setOptimizeWaypoints] = useState(false);
-  const API_KEY = "AIzaSyAH8zoNx77UvZIH0H6xmHIHeNlLlhcuD3s";
+  const API_KEY =import.meta.env.VITE_GMAP_API;
   const mapRef = useRef(null);
   const searchBoxRef = useRef(null);
 
   const { isLoaded } = useJsApiLoader({
-    googleMapsApiKey: "AIzaSyAH8zoNx77UvZIH0H6xmHIHeNlLlhcuD3s",
+    googleMapsApiKey: import.meta.env.VITE_GMAP_API,
     libraries: ["places"],
   });
 
@@ -249,12 +249,20 @@ const Map1 = () => {
           .slice(1) // Exclude the first point which is the origin
           .map((coordinate) => `${coordinate.latitude},${coordinate.longitude}`)
           .join("|");
-
+        
+        const origin = `${latLongArray[0].latitude},${latLongArray[0].longitude}`;
+        const destination = `${latLongArray[0].latitude},${latLongArray[0].longitude}`;
         // Call Directions API for shortest path
-        const url = `https://maps.googleapis.com/maps/api/directions/json?origin=${latLongArray[0].latitude},${latLongArray[0].longitude}&destination=${latLongArray[0].latitude},${latLongArray[0].longitude}&waypoints=optimize:true|${waypoints}&key=${API_KEY}`;
+        // const url = `https://maps.googleapis.com/maps/api/directions/json?origin=${latLongArray[0].latitude},${latLongArray[0].longitude}&destination=${latLongArray[0].latitude},${latLongArray[0].longitude}&waypoints=optimize:true|${waypoints}&key=${API_KEY}`;
 
         try {
-          const response = await fetch(url);
+          const response = await fetch("http://localhost:3000/helper/directions", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ origin, destination, waypoints }),
+          });
           const data = await response.json();
 
           if (!data.routes || data.routes.length === 0) {
@@ -319,39 +327,40 @@ const Map1 = () => {
         .slice(0, -1);
       // Store the optimized route coordinates
       setOptimizedRoute(optimizedRouteCoordinates);
-      if (optimizedRoute && optimizedRoute.length > 1) {
-        const waypoints = optimizedRoute.slice(1, -1).map((point) => ({
-          location: { lat: point.latitude, lng: point.longitude },
-          stopover: true,
-        }));
-
-        const origin = {
-          lat: optimizedRoute[0].latitude,
-          lng: optimizedRoute[0].longitude,
-        };
-
-        const destination = {
-          lat: optimizedRoute[optimizedRoute.length - 1].latitude,
-          lng: optimizedRoute[optimizedRoute.length - 1].longitude,
-        };
-
-        const directionsService = new window.google.maps.DirectionsService();
-        directionsService.route(
-          {
-            origin,
-            destination,
-            waypoints,
-            travelMode: window.google.maps.TravelMode.DRIVING,
-          },
-          (result, status) => {
-            if (status === window.google.maps.DirectionsStatus.OK) {
-              setDirectionsResponse(result);
-            } else {
-              console.error(`Error fetching directions: ${status}`);
-            }
+      if (optimizedRouteCoordinates && optimizedRouteCoordinates.length > 1) {
+            const waypoints = optimizedRouteCoordinates.slice(1, -1).map((point) => ({
+              location: { lat: point.latitude, lng: point.longitude },
+              stopover: true,
+            }));
+      
+            const origin = {
+              lat: optimizedRouteCoordinates[0].latitude,
+              lng: optimizedRouteCoordinates[0].longitude,
+            };
+      
+            const destination = {
+              lat: optimizedRouteCoordinates[optimizedRouteCoordinates.length - 1].latitude,
+              lng: optimizedRouteCoordinates[optimizedRouteCoordinates.length - 1].longitude,
+            };
+      
+            const directionsService = new window.google.maps.DirectionsService();
+            directionsService.route(
+              {
+                origin,
+                destination,
+                waypoints,
+                travelMode: window.google.maps.TravelMode.DRIVING,
+              },
+              (result, status) => {
+                if (status === window.google.maps.DirectionsStatus.OK) {
+                  setDirectionsResponse(result);
+                  console.log(result) // Update the directionsResponse state
+                } else {
+                  console.error(`Error fetching directions: ${status}`);
+                }
+              }
+            );
           }
-        );
-      }
       console.log("Optimized Route:", optimizedRoute);
     } catch (error) {
       if (error.name === "AbortError") {
@@ -553,7 +562,8 @@ const Map1 = () => {
                   onChange={(e) =>
                     setFormData({ ...formData, mobile: e.target.value })
                   }
-                  style={{ marginBottom: 10, width: "100%", padding: 8 }}
+                  style={{ marginBottom: 10, width: "100%", padding: 8 , cursor:"pointer"}}
+                  onClick={(e)=> e.target.showPicker()}
                 />
                 <input
                   type="time"
@@ -562,13 +572,8 @@ const Map1 = () => {
                   onChange={(e) =>
                     setFormData({ ...formData, startTime: e.target.value })
                   }
-                  onClick={(e) => e.target.showPicker()}
-                  style={{
-                    marginBottom: 10,
-                    width: "100%",
-                    padding: 8,
-                    cursor: "pointer",
-                  }}
+                  style={{ marginBottom: 10, width: "100%", padding: 8 }}
+                  onClick={(e)=> e.target.showPicker()}
                 />
                 <input
                   type="time"
@@ -577,13 +582,8 @@ const Map1 = () => {
                   onChange={(e) =>
                     setFormData({ ...formData, endTime: e.target.value })
                   }
-                  onClick={(e) => e.target.showPicker()}
-                  style={{
-                    marginBottom: 10,
-                    width: "100%",
-                    padding: 8,
-                    cursor: "pointer",
-                  }}
+                  style={{ marginBottom: 10, width: "100%", padding: 8 , cursor:"pointer"}}
+                  onClick={(e)=> e.target.showPicker()}
                 />
                 <button
                   onClick={handleAddLocation}
